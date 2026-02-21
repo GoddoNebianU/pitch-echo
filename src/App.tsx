@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "./utils/cn";
 import { usePitchy } from "./lib/usePitchy";
 import { getKeyByFreq } from "./utils/piano";
@@ -12,6 +12,15 @@ const getBlackKeyIndex = (whiteKeyIndex: number) => Math.floor(whiteKeyIndex / 7
         4: 3,
         5: 4
     }[whiteKeyIndex % 7]!;
+
+const getWhiteKeyIndex = (blackKeyIndex: number) => Math.floor(blackKeyIndex / 5) * 7 +
+    {
+        0: 0,
+        1: 1,
+        2: 3,
+        3: 4,
+        4: 5
+    }[blackKeyIndex % 5]!;
 
 const findNearestKey = (pitch: number) => {
     const n = getKeyByFreq(pitch) - 1 - 15;
@@ -47,6 +56,20 @@ const findNearestKey = (pitch: number) => {
 };
 
 export default function App() {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const blockQueue = useRef<Array<{
+        "type": "white" | "black";
+        "index": number;
+        "y": number;
+        "len": number;
+    }>>([{
+        type: "black",
+        index: 4,
+        y: 0,
+        len: 100
+    }]);
+    const { pitch, init } = usePitchy();
+
     const [whiteKeysPressed, setWhiteKeysPressed] = useState(() =>
         Array.from({ length: 35 }, () => false)
         // .map((v, i) => i === 4 && true || v)
@@ -55,8 +78,6 @@ export default function App() {
         Array.from({ length: 25 }, () => false)
         // .map((v, i) => i === 5 && true || v)
     );
-
-    const { pitch, init } = usePitchy();
 
     useEffect(() => {
         setTimeout(() => {
@@ -70,11 +91,7 @@ export default function App() {
                 setWhiteKeysPressed(
                     Array.from({ length: 35 }, () => false)
                 );
-                return;
-            };
-
-            if (key.type === "black") {
-                console.log(key)
+            } else if (key.type === "black") {
                 setBlackKeysPressed(
                     Array.from({ length: 25 }, (_, i) => i === key.index)
                 );
@@ -89,15 +106,62 @@ export default function App() {
                     Array.from({ length: 25 }, () => false)
                 );
             }
+
+            const ctx = canvasRef.current?.getContext("2d");
+            if (!ctx || !blockQueue.current) return;
+            const KEY_WIDTH = 6;
+            const START_Y = 100;
+
+            const lastBlock = blockQueue.current[blockQueue.current.length - 1];
+            if (key !== 0) {
+                if (key.index === lastBlock.index && key.type === lastBlock.type) {
+                    lastBlock.len++;
+                } else {
+                    blockQueue.current.push({
+                        type: key.type as "white" | "black",
+                        index: key.index,
+                        y: 0,
+                        len: 0
+                    });
+                }
+            }
+            for (const block of blockQueue.current) {
+                block.y++;
+                block.len += block.len > 10 ? 0 : 1;
+            }
+            for (const block of blockQueue.current) {
+                if (block.type === "white") {
+                    ctx.clearRect(block.index * 24 + 12 - KEY_WIDTH / 2, START_Y + block.y - block.len, KEY_WIDTH, 1);
+                } else {
+                    const wi = getWhiteKeyIndex(block.index);
+                    ctx.clearRect(wi * 24 + 15 + 9 - KEY_WIDTH / 2, START_Y + block.y - block.len, KEY_WIDTH, 1);
+                }
+            }
+            for (const block of blockQueue.current) {
+                // if (block.len < 10) continue;
+
+                if (block.type === "white") {
+                    ctx.fillStyle = "blue";
+                    ctx.fillRect(block.index * 24 + 12 - KEY_WIDTH / 2, START_Y + block.y, KEY_WIDTH, 1);
+                } else {
+                    const wi = getWhiteKeyIndex(block.index);
+                    ctx.fillStyle = "green";
+                    ctx.fillRect(wi * 24 + 15 + 9 - KEY_WIDTH / 2, START_Y + block.y, KEY_WIDTH, 1);
+                }
+            }
+            const l = blockQueue.current.length;
+            if (blockQueue.current[l - 2].y > 400) {
+                blockQueue.current = blockQueue.current.splice(l - 2);
+            }
         }, 0);
     }, [pitch]);
 
     return (
         <div className={cn("shadow w-10/12 mt-4 p-2 mx-auto",
-            "flex flex-col justify-center items-center"
+            "flex flex-col justify-center items-center gap-2"
         )}>
             <h1 className="font-bold text-2xl">pitch echo</h1>
-            <div className="border">
+            <div className="border flex flex-col">
                 {/* c2->b6 */}
                 <div className="h-32 flex">
                     {
@@ -122,6 +186,10 @@ export default function App() {
                         })
                     }
                 </div>
+                <canvas
+                    width={840}
+                    height={400}
+                    ref={canvasRef}>Your browser does not support canvas.</canvas>
             </div>
             {pitch === -1 && <div>
                 <label>record</label>
@@ -131,7 +199,6 @@ export default function App() {
                     }
                 }} />
             </div>}
-            <span>{pitch}</span>
         </div>
     );
 }

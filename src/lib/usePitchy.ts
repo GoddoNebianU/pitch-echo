@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { PitchDetector } from "pitchy";
 
-
-
 export function usePitchy() {
     const [pitch, setPitch] = useState(-1);
 
@@ -13,7 +11,7 @@ export function usePitchy() {
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
             audioContext.createMediaStreamSource(stream).connect(analyserNode);
             const detector = PitchDetector.forFloat32Array(analyserNode.fftSize);
-            detector.minVolumeDecibels = -1000;
+            detector.minVolumeDecibels = -50;
             const input = new Float32Array(detector.inputLength);
 
             const updatePitch = () => {
