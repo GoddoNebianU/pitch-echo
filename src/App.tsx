@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "./utils/cn";
-import { usePitchy } from "./lib/usePitchy";
+import { useMicPitch } from "./lib/usePitchy";
 import { getKeyByFreq } from "./utils/piano";
 
 
@@ -68,7 +68,7 @@ export default function App() {
         y: 0,
         len: 100
     }]);
-    const { pitch, init } = usePitchy();
+    const { mPitch, mInit } = useMicPitch();
 
     const [whiteKeysPressed, setWhiteKeysPressed] = useState(() =>
         Array.from({ length: 35 }, () => false)
@@ -81,7 +81,7 @@ export default function App() {
 
     useEffect(() => {
         setTimeout(() => {
-            const key = findNearestKey(pitch);
+            const key = findNearestKey(mPitch);
             // const key = findNearestKey(554);
 
             if (key === 0) {
@@ -154,7 +154,7 @@ export default function App() {
                 blockQueue.current = blockQueue.current.splice(l - 2);
             }
         }, 0);
-    }, [pitch]);
+    }, [mPitch]);
 
     return (
         <div className={cn("shadow w-10/12 mt-4 p-2 mx-auto",
@@ -191,11 +191,11 @@ export default function App() {
                     height={400}
                     ref={canvasRef}>Your browser does not support canvas.</canvas>
             </div>
-            {pitch === -1 && <div>
+            {mPitch === -1 && <div>
                 <label>record</label>
                 <input type="checkbox" onChange={e => {
                     if (e.target.checked) {
-                        init();
+                        mInit();
                     }
                 }} />
             </div>}

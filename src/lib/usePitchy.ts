@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { PitchDetector } from "pitchy";
 
-export function usePitchy() {
-    const [pitch, setPitch] = useState(-1);
+export function useMicPitch() {
+    const [mPitch, setMPitch] = useState(-1);
 
-    const init = () => {
+    const mInit = () => {
         const audioContext = new window.AudioContext();
         const analyserNode = audioContext.createAnalyser();
 
@@ -18,7 +18,7 @@ export function usePitchy() {
                 analyserNode.getFloatTimeDomainData(input);
                 const pitch = detector.findPitch(input, audioContext.sampleRate)[0];
 
-                setPitch(pitch);
+                setMPitch(pitch);
                 window.setTimeout(
                     () => updatePitch(),
                     1 / 24,
@@ -27,5 +27,5 @@ export function usePitchy() {
             updatePitch();
         });
     };
-    return { pitch, init };
+    return { mPitch, mInit: mInit };
 }
