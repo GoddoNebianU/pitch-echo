@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PitchDetector } from "pitchy";
+import { AUDIO_FILE_FPS, MIN_VOLUME_DECIBELS_A } from "./config";
 
 export function useAudioFilePitch(url: string) {
   const [pitchList, setPitchList] = useState<number[]>([]);
@@ -16,13 +17,13 @@ export function useAudioFilePitch(url: string) {
       const channelData = audioBuffer.getChannelData(0);
       const sampleRate = audioBuffer.sampleRate;
 
-      // 60fps 时间步长
-      const targetFPS = 60;
+      // 时间步长
+      const targetFPS = AUDIO_FILE_FPS;
       const hop = sampleRate / targetFPS; // 每帧间隔（采样点）
 
       // pitchy detector
       const detector = PitchDetector.forFloat32Array(1024);
-      detector.minVolumeDecibels = -50;
+      detector.minVolumeDecibels = MIN_VOLUME_DECIBELS_A;
       const input = new Float32Array(detector.inputLength);
 
       const pitches: number[] = [];

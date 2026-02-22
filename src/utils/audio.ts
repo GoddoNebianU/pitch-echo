@@ -1,3 +1,4 @@
+import { MIN_KEY_INDEX } from "../lib/config";
 import { getKeyByFreq } from "./piano";
 
 /**
@@ -20,8 +21,8 @@ export function nearestFrameIndex(
 
     // 防止越界
     return Math.max(0, Math.min(index, maxIndex));
-}export const findNearestKey = (pitch: number) => {
-    const n = getKeyByFreq(pitch) - 1 - 15;
+} export const findNearestKey = (pitch: number) => {
+    const n = getKeyByFreq(pitch) - 1 - MIN_KEY_INDEX;
     if (n < 0) return 0;
 
     if ([1, 3, 6, 8, 10].includes(n % 12)) {

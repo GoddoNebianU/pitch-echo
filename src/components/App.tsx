@@ -1,27 +1,28 @@
 import { cn } from "../utils/cn";
-import MCanvas from "./MCanvas";
+import MyCanvas from "./MyCanvas";
 import { useEffect, useRef, useState } from "react";
 import { useMicPitch } from "../lib/useMicPitch";
 import { aCanvasDraw, mCanvasDraw } from "../utils/canvas";
-import ACanvas from "./ACanvas";
 import { useAudioFilePitch } from "../lib/useAudioFilePitch";
 import Piano from "./Piano";
+import { BLACK_KEY_COUNT, DEFAULT_SONG_URL, WHITE_KEY_COUNT } from "../lib/config";
 
 export default function App() {
     const mCanvasRef = useRef<HTMLCanvasElement>(null);
     const aCanvasRef = useRef<HTMLCanvasElement>(null);
     const [playBeginTime, setPlayBeginTime] = useState<null | number>(null);
     const [mWhiteKeysPressed, setMWhiteKeysPressed] = useState(() =>
-        Array.from({ length: 35 }, () => false)
+        Array.from({ length: WHITE_KEY_COUNT }, () => false)
         // .map((v, i) => i === 4 && true || v)
     );
     const [mBlackKeysPressed, setMBlackKeysPressed] = useState(() =>
-        Array.from({ length: 25 }, () => false)
+        Array.from({ length: BLACK_KEY_COUNT }, () => false)
         // .map((v, i) => i === 5 && true || v)
     );
     const [running, setRunning] = useState(false);
+    const [isFirstInterval, setIsFirstInterval] = useState(true);
     const { mPitch, mInit } = useMicPitch();
-    const { pitchList, aInit } = useAudioFilePitch("/01.flac");
+    const { pitchList, aInit } = useAudioFilePitch(DEFAULT_SONG_URL);
 
     const mBlockQueue = useRef<Array<{
         "type": "white" | "black";
@@ -39,6 +40,13 @@ export default function App() {
     useEffect(() => {
         // if (mPitch <= 0) return;
         timer.current = window.setInterval(() => {
+            if (!pitchList.length) return;
+            if (isFirstInterval) {
+                const audio = new Audio(DEFAULT_SONG_URL);
+                audio.play();
+                setPlayBeginTime(Date.now());
+                setIsFirstInterval(false);
+            }
             mCanvasDraw({
                 pitch: mPitch,
                 canvasRef: mCanvasRef,
@@ -56,7 +64,7 @@ export default function App() {
         return () => {
             if (timer.current) window.clearInterval(timer.current);
         };
-    }, [mPitch, pitchList, playBeginTime]);
+    }, [isFirstInterval, mPitch, pitchList, playBeginTime]);
 
     return (
         <div className={cn("shadow-lg w-fit h-[650px] mt-4 p-4 mx-auto",
@@ -70,20 +78,15 @@ export default function App() {
                         mInit();
                         aInit();
                         setRunning(true);
-
-                        const audio = new Audio("/01.flac");
-                        // audio.volume = 0.1;
-                        audio.play();
-                        setPlayBeginTime(Date.now());
                     }
                 }} />
             </div>}
             <Piano whiteKeysPressed={mWhiteKeysPressed} blackKeysPressed={mBlackKeysPressed} />
             <div className="relative">
-                <ACanvas
-                    canvasRef={aCanvasRef} />
-                <MCanvas
-                    canvasRef={mCanvasRef} />
+                <MyCanvas
+                    canvasRef={aCanvasRef} transparent={false} />
+                <MyCanvas
+                    canvasRef={mCanvasRef} transparent={true} />
             </div>
         </div>
     );

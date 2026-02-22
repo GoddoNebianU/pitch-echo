@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PitchDetector } from "pitchy";
+import { MIC_FPS, MIN_VOLUME_DECIBELS_M } from "./config";
 
 export function useMicPitch() {
     const [mPitch, setMPitch] = useState(-1);
@@ -11,7 +12,7 @@ export function useMicPitch() {
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
             audioContext.createMediaStreamSource(stream).connect(analyserNode);
             const detector = PitchDetector.forFloat32Array(analyserNode.fftSize);
-            detector.minVolumeDecibels = -10;
+            detector.minVolumeDecibels = MIN_VOLUME_DECIBELS_M;
             const input = new Float32Array(detector.inputLength);
 
             const updatePitch = () => {
@@ -21,7 +22,7 @@ export function useMicPitch() {
                 setMPitch(pitch);
                 window.setTimeout(
                     () => updatePitch(),
-                    1000 / 24,
+                    1000 / MIC_FPS,
                 );
             };
             updatePitch();
