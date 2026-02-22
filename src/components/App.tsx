@@ -5,7 +5,7 @@ import { useMicPitch } from "../lib/useMicPitch";
 import { aCanvasDraw, mCanvasDraw } from "../utils/canvas";
 import { useAudioFilePitch } from "../lib/useAudioFilePitch";
 import Piano from "./Piano";
-import { BLACK_KEY_COUNT, DEFAULT_SONG_URL, WHITE_KEY_COUNT } from "../lib/config";
+import { BLACK_KEY_COUNT, CANVAS_WIDTH, DEFAULT_SONG_URL, START_Y_M, WHITE_KEY_COUNT } from "../lib/config";
 
 export default function App() {
     const mCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -81,12 +81,19 @@ export default function App() {
                     }
                 }} />
             </div>}
+
             <Piano whiteKeysPressed={mWhiteKeysPressed} blackKeysPressed={mBlackKeysPressed} />
             <div className="relative">
                 <MyCanvas
                     canvasRef={aCanvasRef} transparent={false} />
                 <MyCanvas
                     canvasRef={mCanvasRef} transparent={true} />
+                <div
+                    style={{
+                        marginTop: START_Y_M + "px",
+                        width: CANVAS_WIDTH + "px"
+                    }}
+                    className="h-1 bg-black/50"></div>
             </div>
         </div>
     );

@@ -15,15 +15,15 @@ export const DEFAULT_SONG_URL = "./02.mp3";
 export const AUDIO_FILE_FPS = 60;
 export const MIC_FPS = 24;
 
-export const MIN_VOLUME_DECIBELS_A = -100;
-export const MIN_VOLUME_DECIBELS_M = -100;
+export const MIN_VOLUME_DECIBELS_A = -1000;
+export const MIN_VOLUME_DECIBELS_M = -1000;
 
 export const BLOCK_WHITE_WIDTH_M = 5;
 export const BLOCK_BLACK_WIDTH_M = 5;
 export const BLOCK_WHITE_WIDTH_A = 15;
 export const BLOCK_BLACK_WIDTH_A = 15;
 
-export const BLOCK_LEN_MIN = 10;
+export const BLOCK_LEN_MIN = 5;
 
 export const BLOCK_COLOR_WHITE_M = "gray";
 export const BLOCK_COLOR_BLACK_M = "gray";
