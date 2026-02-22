@@ -21,7 +21,11 @@ export default function App() {
     );
     const [running, setRunning] = useState(false);
     const [isFirstInterval, setIsFirstInterval] = useState(true);
-    const { mPitch, mInit } = useMicPitch();
+    const { pitchResult: mPitch, mInit, mCleanup } = useMicPitch();
+    const mPitchRef = useRef(mPitch);
+    useEffect(() => {
+        mPitchRef.current = mPitch;
+    });
     const { pitchList, aInit } = useAudioFilePitch(DEFAULT_SONG_URL);
 
     const mBlockQueue = useRef<Array<{
@@ -48,7 +52,7 @@ export default function App() {
                 setIsFirstInterval(false);
             }
             mCanvasDraw({
-                pitch: mPitch,
+                pitch: mPitchRef.current.pitch,
                 canvasRef: mCanvasRef,
                 setWhiteKeysPressed: setMWhiteKeysPressed,
                 setBlackKeysPressed: setMBlackKeysPressed,
@@ -64,10 +68,17 @@ export default function App() {
         return () => {
             if (timer.current) window.clearInterval(timer.current);
         };
-    }, [isFirstInterval, mPitch, pitchList, playBeginTime]);
+    }, [isFirstInterval, pitchList, playBeginTime]);
+
+    // 清理麦克风资源
+    useEffect(() => {
+        return () => {
+            mCleanup();
+        };
+    }, [mCleanup]);
 
     return (
-        <div className={cn("shadow-lg w-fit h-[650px] mt-4 p-4 mx-auto",
+        <div className={cn("shadow-lg w-fit h-162.5 mt-4 p-4 mx-auto",
             "flex flex-col items-center gap-2"
         )}>
             <h1 className="font-bold text-2xl">pitch echo</h1>

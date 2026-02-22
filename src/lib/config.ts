@@ -15,8 +15,10 @@ export const DEFAULT_SONG_URL = "./02.mp3";
 export const AUDIO_FILE_FPS = 60;
 export const MIC_FPS = 24;
 
-export const MIN_VOLUME_DECIBELS_A = -1000;
-export const MIN_VOLUME_DECIBELS_M = -1000;
+export const MIN_VOLUME_DECIBELS_A = -100;
+export const MIN_VOLUME_DECIBELS_M = -100;
+
+export const PITCH_SMOOTHING = 3;
 
 export const BLOCK_WHITE_WIDTH_M = 5;
 export const BLOCK_BLACK_WIDTH_M = 5;
@@ -33,4 +35,4 @@ export const BLOCK_COLOR_BLACK_A = "#ff00ff";
 export const START_Y_M = 150;
 export const START_Y_A = 0;
 
-export const SONG_DELAY_MS = 2500;
+export const SONG_DELAY_MS = 0;
