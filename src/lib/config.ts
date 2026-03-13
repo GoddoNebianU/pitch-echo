@@ -14,7 +14,7 @@ export const WHITE_KEY_WIDTH = 24;
 export const BLACK_KEY_WIDTH = 18;
 
 export const CANVAS_WIDTH = WHITE_KEY_COUNT * WHITE_KEY_WIDTH;
-export const CANVAS_HEIGHT = 400;
+export const CANVAS_HEIGHT = 380;
 
 export const DEFAULT_SONG_URL = "./02.mp3";
 

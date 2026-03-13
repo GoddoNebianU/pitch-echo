@@ -18,6 +18,24 @@ export function useMicPitch() {
         dbThreshold
     } = useGlobalStore();
 
+    // const smoothPitch = (newPitch: number) => {
+    //     const ph = pitchHistoryRef.current;
+    //     ph.push(newPitch);
+    //     if (ph.length > PITCH_SMOOTHING_WINDOW) {
+    //         ph.shift();
+    //     }
+    //     const N = ph.length;
+    //     const ws = Array.from({ length: N }).map((_, i) => {
+    //         return Math.pow(1 - PITCH_SMOOTHING_ATTENUATION_COEFFICIENT, N - i);
+    //     });
+    //     const result = ph.reduce((p, v, i) => {
+    //         return p + v * ws[i];
+    //     }) / ws.reduce((p, v) => p + v);
+    //     ph.shift();
+    //     ph.push(result);
+    //     return result;
+    // };
+
     const smoothPitch = (newPitch: number) => {
         const ph = pitchHistoryRef.current;
         ph.push(newPitch);
