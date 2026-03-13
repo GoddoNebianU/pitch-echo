@@ -49,6 +49,8 @@ export function mCanvasDraw({
         len: number;
     }[]>;
 }) {
+    if (pitch === -1) return;
+
     const key = findNearestKey(pitch);
 
     // 键盘按键变色

@@ -1,6 +1,7 @@
 import { useCallback, useState, useRef } from "react";
 import { PitchDetector } from "pitchy";
-import { MIN_VOLUME_DECIBELS_M, PITCH_SMOOTHING } from "./config";
+import { MAX_FREQ, MIN_FREQ, PITCH_SMOOTHING_ATTENUATION_COEFFICIENT, PITCH_SMOOTHING_WINDOW } from "./config";
+import { useGlobalStore } from "../globalStore";
 
 interface PitchResult {
     pitch: number;
@@ -13,13 +14,23 @@ export function useMicPitch() {
     const streamRef = useRef<MediaStream | null>(null);
     const animationFrameRef = useRef<number | null>(null);
     const pitchHistoryRef = useRef<number[]>([]);
+    const {
+        dbThreshold
+    } = useGlobalStore();
 
-    const smoothPitch = (newPitch: number): number => {
-        pitchHistoryRef.current.push(newPitch);
-        if (pitchHistoryRef.current.length > PITCH_SMOOTHING) {
-            pitchHistoryRef.current.shift();
+    const smoothPitch = (newPitch: number) => {
+        const ph = pitchHistoryRef.current;
+        ph.push(newPitch);
+        if (ph.length > PITCH_SMOOTHING_WINDOW) {
+            ph.shift();
         }
-        return pitchHistoryRef.current.reduce((a, b) => a + b) / pitchHistoryRef.current.length;
+        const N = ph.length;
+        const ws = Array.from({ length: N }).map((_, i) => {
+            return Math.pow(1 - PITCH_SMOOTHING_ATTENUATION_COEFFICIENT, N - i);
+        });
+        return ph.reduce((p, v, i) => {
+            return p + v * ws[i];
+        }) / ws.reduce((p, v) => p + v);
     };
 
     const calculateVolume = (input: Float32Array): number => {
@@ -40,24 +51,32 @@ export function useMicPitch() {
             streamRef.current = stream;
             audioContext.createMediaStreamSource(stream).connect(analyserNode);
             const detector = PitchDetector.forFloat32Array(analyserNode.fftSize);
-            detector.minVolumeDecibels = MIN_VOLUME_DECIBELS_M;
+            detector.minVolumeDecibels = -1000;
             const input = new Float32Array(detector.inputLength);
 
             const updatePitch = () => {
                 analyserNode.getFloatTimeDomainData(input);
                 const volume = calculateVolume(input);
 
-                if (volume < MIN_VOLUME_DECIBELS_M) {
+                if (volume < dbThreshold) {
                     setPitchResult({ pitch: -1, volume });
                     animationFrameRef.current = requestAnimationFrame(updatePitch);
                     return;
                 }
 
                 const [pitch] = detector.findPitch(input, audioContext.sampleRate);
+
+                if (pitch < MIN_FREQ || pitch > MAX_FREQ) {
+                    console.log(pitch);
+                    animationFrameRef.current = requestAnimationFrame(updatePitch);
+                    return;
+                };
+
                 const smoothedPitch = smoothPitch(pitch);
 
                 setPitchResult({ pitch: smoothedPitch, volume });
                 animationFrameRef.current = requestAnimationFrame(updatePitch);
+                return;
             };
             updatePitch();
         });

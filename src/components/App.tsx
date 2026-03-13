@@ -6,10 +6,17 @@ import { aCanvasDraw, mCanvasDraw } from "../utils/canvas";
 import { useAudioFilePitch } from "../lib/useAudioFilePitch";
 import Piano from "./Piano";
 import { BLACK_KEY_COUNT, CANVAS_WIDTH, DEFAULT_SONG_URL, ENABLE_AUDIO, START_Y_M, WHITE_KEY_COUNT } from "../lib/config";
+import { useGlobalStore } from "../globalStore";
 
 export default function App() {
     const mCanvasRef = useRef<HTMLCanvasElement>(null);
     const aCanvasRef = useRef<HTMLCanvasElement>(null);
+
+    const {
+        dbThreshold,
+        setDbThreshold
+    } = useGlobalStore();
+
     const [playBeginTime, setPlayBeginTime] = useState<null | number>(null);
     const [mWhiteKeysPressed, setMWhiteKeysPressed] = useState(() =>
         Array.from({ length: WHITE_KEY_COUNT }, () => false)
@@ -93,6 +100,16 @@ export default function App() {
                         setRunning(true);
                     }
                 }} />
+            </div>
+            }
+
+            {<div>
+                <label>分贝阈值： {dbThreshold}dB</label>
+                <input type="range" min={1} max={100}
+                    value={-dbThreshold}
+                    onChange={(e) => {
+                        setDbThreshold(-parseInt(e.target.value));
+                    }} />
             </div>}
 
             <Piano whiteKeysPressed={mWhiteKeysPressed} blackKeysPressed={mBlackKeysPressed} />

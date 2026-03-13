@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PitchDetector } from "pitchy";
-import { AUDIO_FILE_FPS, MIN_VOLUME_DECIBELS_A } from "./config";
+import { AUDIO_FILE_FPS, MIN_VOLUME_DECIBELS_A, PITCH_SMOOTHING_ATTENUATION_COEFFICIENT, PITCH_SMOOTHING_WINDOW } from "./config";
 
 export function useAudioFilePitch(url: string) {
   const [pitchList, setPitchList] = useState<number[]>([]);
@@ -9,7 +9,7 @@ export function useAudioFilePitch(url: string) {
     (async () => {
       const audioContext = new AudioContext();
 
-      // 1️⃣ 拉取并解码
+      // 拉取解码
       const res = await fetch(url);
       const arrayBuffer = await res.arrayBuffer();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
@@ -28,7 +28,7 @@ export function useAudioFilePitch(url: string) {
 
       const pitches: number[] = [];
 
-      // 2️⃣ 按时间均匀采样
+      // 按时间均匀采样
       for (
         let pos = 0;
         pos + detector.inputLength < channelData.length;
@@ -42,6 +42,21 @@ export function useAudioFilePitch(url: string) {
         const [pitch] = detector.findPitch(input, sampleRate);
         pitches.push(pitch || 0);
       }
+
+      const ph: Array<number> = [];
+
+      for (let i = 0; i < pitches.length; i++) {
+        ph.push(pitches[i]);
+        if (ph.length > PITCH_SMOOTHING_WINDOW) {
+          ph.shift();
+        }
+        const N = ph.length;
+        const ws = Array.from({ length: N }).map((_, i) => {
+          return Math.pow(1 - PITCH_SMOOTHING_ATTENUATION_COEFFICIENT, N - i);
+        });
+        pitches[i] = ph.reduce((p, v, i) => p + v * ws[i]) / ws.reduce((p, v) => p + v);
+      }
+
       setPitchList(pitches);
     })();
   };

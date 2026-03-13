@@ -1,5 +1,11 @@
+import { getFreqOfKey } from "../utils/piano";
+
 export const MIN_KEY_INDEX = 15; // C2->B6 只支持Cn1到Bn2，n2>n1
 export const MAX_KEY_INDEX = 74;
+
+export const MIN_FREQ = getFreqOfKey(MIN_KEY_INDEX - 1);
+export const MAX_FREQ = getFreqOfKey(MAX_KEY_INDEX + 1);
+
 export const KEY_COUNT = MAX_KEY_INDEX - MIN_KEY_INDEX + 1;
 export const WHITE_KEY_COUNT = KEY_COUNT / 12 * 7;
 export const BLACK_KEY_COUNT = KEY_COUNT / 12 * 5;
@@ -15,10 +21,19 @@ export const DEFAULT_SONG_URL = "./02.mp3";
 export const AUDIO_FILE_FPS = 60;
 export const MIC_FPS = 24;
 
-export const MIN_VOLUME_DECIBELS_A = -100;
-export const MIN_VOLUME_DECIBELS_M = -100;
+export const MIN_VOLUME_DECIBELS_A = -30;
+export const MIN_VOLUME_DECIBELS_M = -10;
 
-export const PITCH_SMOOTHING = 3;
+export const PITCH_SMOOTHING_ATTENUATION_COEFFICIENT = 0.02;
+export const PITCH_SMOOTHING_WINDOW = (() => {
+    const alpha = PITCH_SMOOTHING_ATTENUATION_COEFFICIENT;
+    const t = 1 - alpha;
+    const m = 0.05;
+    return -Math.round(
+        Math.log((m * t - t + 1) / (m * t))
+        / Math.log(t)
+    );
+})();
 
 export const BLOCK_WHITE_WIDTH_M = 5;
 export const BLOCK_BLACK_WIDTH_M = 5;
@@ -38,4 +53,4 @@ export const START_Y_A = 0;
 
 export const SONG_DELAY_MS = 0;
 
-export const ENABLE_AUDIO = true;
+export const ENABLE_AUDIO = false;
