@@ -5,7 +5,7 @@ import { useMicPitch } from "../lib/useMicPitch";
 import { aCanvasDraw, mCanvasDraw } from "../utils/canvas";
 import { useAudioFilePitch } from "../lib/useAudioFilePitch";
 import Piano from "./Piano";
-import { BLACK_KEY_COUNT, CANVAS_WIDTH, DEFAULT_SONG_URL, START_Y_M, WHITE_KEY_COUNT } from "../lib/config";
+import { BLACK_KEY_COUNT, CANVAS_WIDTH, DEFAULT_SONG_URL, ENABLE_AUDIO, START_Y_M, WHITE_KEY_COUNT } from "../lib/config";
 
 export default function App() {
     const mCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -44,12 +44,20 @@ export default function App() {
     useEffect(() => {
         // if (mPitch <= 0) return;
         timer.current = window.setInterval(() => {
-            if (!pitchList.length) return;
-            if (isFirstInterval) {
-                const audio = new Audio(DEFAULT_SONG_URL);
-                audio.play();
-                setPlayBeginTime(Date.now());
-                setIsFirstInterval(false);
+            if (ENABLE_AUDIO) {
+                if (!pitchList.length) return;
+                if (isFirstInterval) {
+                    const audio = new Audio(DEFAULT_SONG_URL);
+                    audio.play();
+                    setPlayBeginTime(Date.now());
+                    setIsFirstInterval(false);
+                }
+                aCanvasDraw({
+                    canvasRef: aCanvasRef,
+                    blockQueue: aBlockQueue,
+                    playBeginTime: playBeginTime,
+                    pitchList: pitchList
+                });
             }
             mCanvasDraw({
                 pitch: mPitchRef.current.pitch,
@@ -57,12 +65,6 @@ export default function App() {
                 setWhiteKeysPressed: setMWhiteKeysPressed,
                 setBlackKeysPressed: setMBlackKeysPressed,
                 blockQueue: mBlockQueue,
-            });
-            aCanvasDraw({
-                canvasRef: aCanvasRef,
-                blockQueue: aBlockQueue,
-                playBeginTime: playBeginTime,
-                pitchList: pitchList
             });
         }, 1000 / 60);
         return () => {
@@ -87,7 +89,7 @@ export default function App() {
                 <input type="checkbox" onChange={e => {
                     if (e.target.checked) {
                         mInit();
-                        aInit();
+                        if (ENABLE_AUDIO) aInit();
                         setRunning(true);
                     }
                 }} />
@@ -95,8 +97,10 @@ export default function App() {
 
             <Piano whiteKeysPressed={mWhiteKeysPressed} blackKeysPressed={mBlackKeysPressed} />
             <div className="relative">
-                <MyCanvas
-                    canvasRef={aCanvasRef} transparent={false} />
+                {
+                    ENABLE_AUDIO && (<MyCanvas
+                        canvasRef={aCanvasRef} transparent={false} />)}
+
                 <MyCanvas
                     canvasRef={mCanvasRef} transparent={true} />
                 <div

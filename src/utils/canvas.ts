@@ -25,10 +25,10 @@ function getBlockX(block: {
     len: number;
 }) {
     if (block.type === "white") {
-        return block.index * WHITE_KEY_WIDTH + WHITE_KEY_WIDTH - BLOCK_BLACK_WIDTH_M / 2;
+        return block.index * WHITE_KEY_WIDTH + WHITE_KEY_WIDTH / 2 - BLOCK_WHITE_WIDTH_M / 2;
     }
     const wi = getWhiteKeyIndex(block.index);
-    return wi * WHITE_KEY_WIDTH + WHITE_KEY_WIDTH - BLOCK_WHITE_WIDTH_M / 2;
+    return wi * WHITE_KEY_WIDTH + WHITE_KEY_WIDTH - BLOCK_BLACK_WIDTH_M / 2;
 }
 
 export function mCanvasDraw({

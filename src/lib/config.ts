@@ -32,7 +32,10 @@ export const BLOCK_COLOR_BLACK_M = "gray";
 export const BLOCK_COLOR_WHITE_A = "#ff00ff";
 export const BLOCK_COLOR_BLACK_A = "#ff00ff";
 
-export const START_Y_M = 150;
+// export const START_Y_M = 150;
+export const START_Y_M = 0;
 export const START_Y_A = 0;
 
 export const SONG_DELAY_MS = 0;
+
+export const ENABLE_AUDIO = true;
