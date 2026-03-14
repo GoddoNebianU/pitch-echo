@@ -9,8 +9,8 @@ Real-time Pitch Detection and Display System
 ```bash
 git clone https://github.com/GoddoNebianU/pitch-echo.git
 cd pitch-echo
-pnpm i
-pnpm dev
+npm i
+npm dev
 ```
 
 ## 技术细节
